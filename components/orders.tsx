@@ -1,10 +1,10 @@
 "use client"
 
-import * as React from "react"
 import {
     CaretSortIcon,
     ChevronDownIcon,
     DotsHorizontalIcon,
+    EnvelopeOpenIcon,
 } from "@radix-ui/react-icons"
 import {
     ColumnDef,
@@ -18,6 +18,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
+import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -30,7 +31,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import {
     Table,
     TableBody,
@@ -39,12 +46,11 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-
-const data: Payment[] = [
+const data: Order[] = [
     {
         id: "m5gr84i9",
         amount: 316,
-        status: "success",
+        status: "pending",
         email: "ken99@yahoo.com",
     },
     {
@@ -68,19 +74,19 @@ const data: Payment[] = [
     {
         id: "bhqecj4p",
         amount: 721,
-        status: "failed",
+        status: "pending",
         email: "carmella@hotmail.com",
     },
 ]
 
-export type Payment = {
+export type Order = {
     id: string
     amount: number
     status: "pending" | "processing" | "success" | "failed"
     email: string
 }
 
-export const columns: ColumnDef<Payment>[] = [
+export const columns: ColumnDef<Order>[] = [
     {
         id: "select",
         header: ({ table }) => (
@@ -154,7 +160,7 @@ export const columns: ColumnDef<Payment>[] = [
         id: "actions",
         enableHiding: false,
         cell: ({ row }) => {
-            const payment = row.original
+            const Order = row.original
 
             return (
                 <DropdownMenu>
@@ -167,13 +173,23 @@ export const columns: ColumnDef<Payment>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuItem
-                            onClick={() => navigator.clipboard.writeText(payment.id)}
+                            onClick={() => navigator.clipboard.writeText(Order.id)}
                         >
-                            Copy payment ID
+                            Copy Order ID
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem>View customer</DropdownMenuItem>
-                        <DropdownMenuItem>View payment details</DropdownMenuItem>
+                        {Order.status === 'pending' && (
+                            <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                    onClick={() => {
+                                        /* TODO: Handle properly */
+                                        console.log("Create campaign");
+                                    }}
+                                >
+                                    Create Campaign
+                                </DropdownMenuItem>
+                            </>
+                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )
@@ -209,17 +225,41 @@ export function Orders() {
         },
     })
 
+    const selectedOrders = table.getFilteredSelectedRowModel().rows.map(row => row.original);
+    const allSelectedOrdersArePending = selectedOrders.length > 0 && selectedOrders.every(order => order.status === 'pending');
+
+    const handleCreateCampaignClick = () => {
+        selectedOrders.forEach(order => {
+            /* TODO: Handle properly */
+            console.log(`Creating campaign for order ${order.id} from ${order.email}...`);
+        });
+    }
+
     return (
         <div className="w-full">
             <div className="flex items-center py-4">
-                <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
+                <Select
+                    onValueChange={(value) =>
+                        table.getColumn("status")?.setFilterValue(value === " " ? undefined : value as string)
                     }
-                    className="max-w-sm"
-                />
+                >
+                    <SelectTrigger className="w-[180px] mr-4">
+                        <SelectValue placeholder="Filter status..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value=" ">All</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="success">Success</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                    </SelectContent>
+                </Select>
+
+                <Button onClick={handleCreateCampaignClick} variant="outline" className="mr-4" disabled={!allSelectedOrdersArePending}>
+                    <EnvelopeOpenIcon className="mr-2 h-4 w-4" />
+                    Create Campaign
+                </Button>
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
