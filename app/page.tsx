@@ -20,6 +20,7 @@ import { useState } from "react"
 
 import { Dashboard } from "@/components/dashboard"
 import { Orders } from "@/components/orders"
+import { PageNotFound } from "@/components/404"
 
 export default function IndexPage() {
   const tabs = ['Dashboard', 'Orders', 'Products', 'Customers', 'Analytics'] as const;
@@ -113,7 +114,9 @@ export default function IndexPage() {
             <Dashboard navigateToOrders={() => setSelectedTab("Orders")}/>
           ) : selectedTab === "Orders" ? (
             <Orders/>
-          ): null
+          ): (
+            <PageNotFound navigateTo={setSelectedTab as any} />
+          )
         }
       </main>
     </div>
