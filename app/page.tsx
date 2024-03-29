@@ -2,9 +2,7 @@
 import {
   CircleUser,
   Menu,
-  Package2,
-  Search
-} from "lucide-react"
+  Package2} from "lucide-react"
 import Link from "next/link"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { ThemeToggle } from "@/components/theme-toggle"
@@ -18,45 +16,37 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { FunctionComponent, useState } from "react"
+import { useState } from "react"
 
 import { Dashboard } from "@/components/dashboard"
 import { Orders } from "@/components/orders"
 
 export default function IndexPage() {
-  const [selectedTab, setSelectedTab] = useState('Dashboard');
-
-  const tabs = ['Dashboard', 'Orders', 'Products', 'Customers', 'Analytics'];
-
-  const tabComponents: { [key: string]: FunctionComponent } = {
-    'Dashboard': Dashboard,
-    'Orders': Orders,
-  };
-
-  const SelectedComponent = tabComponents[selectedTab];
+  const tabs = ['Dashboard', 'Orders', 'Products', 'Customers', 'Analytics'] as const;
+  type Tab = typeof tabs[number];
+  const [selectedTab, setSelectedTab] = useState<Tab>(tabs[0]);
 
   return (
-    <div className="flex min-h-screen w-full flex-col">
-      <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
-          <Link href="#" className="flex items-center gap-2 text-lg font-semibold md:text-base">
-            <Package2 className="h-6 w-6" />
-            <span className="sr-only">Acme Inc</span>
-          </Link>
-          {tabs.map((tab) => (
-            <Link
-              key={tab}
-              href="#"
-              className={`${tab === selectedTab
-                ? 'text-foreground transition-colors hover:text-foreground'
-                : 'text-muted-foreground transition-colors hover:text-foreground'
-                }`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {tab}
+      <div className="flex min-h-screen w-full flex-col">
+        <header className="sticky top-0 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
+          <nav className="hidden flex-col gap-6 text-lg font-medium md:flex md:flex-row md:items-center md:gap-5 md:text-sm lg:gap-6">
+            <Link href="#" className="flex items-center gap-2 text-lg font-semibold md:text-base">
+              <Package2 className="h-6 w-6" />
+              <span className="sr-only">Acme Inc</span>
             </Link>
-          ))}
+            {tabs.map((tab) => (
+              <Link
+                key={tab}
+                href="#"
+                className={`${tab === selectedTab
+                  ? 'text-foreground transition-colors hover:text-foreground'
+                  : 'text-muted-foreground transition-colors hover:text-foreground'
+                  }`}
+                onClick={() => setSelectedTab(tab)}
+              >
+                {tab}
+              </Link>
+            ))}
         </nav>
         <Sheet>
           <SheetTrigger asChild>
@@ -118,7 +108,13 @@ export default function IndexPage() {
         </div>
       </header>
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <SelectedComponent />
+        {
+          selectedTab === "Dashboard" ? (
+            <Dashboard navigateToOrders={() => setSelectedTab("Orders")}/>
+          ) : selectedTab === "Orders" ? (
+            <Orders/>
+          ): null
+        }
       </main>
     </div>
   )

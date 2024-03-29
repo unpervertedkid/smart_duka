@@ -26,7 +26,7 @@ import {
     TableRow,
 } from "@/components/ui/table"
 
-export function Dashboard() {
+export function Dashboard({ navigateToOrders }: { navigateToOrders: () => void }) {
     return (
         <div className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
             <div className="grid gap-4 md:grid-cols-2 md:gap-8 lg:grid-cols-4">
@@ -92,11 +92,9 @@ export function Dashboard() {
                                 Recent completed orders from your store.
                             </CardDescription>
                         </div>
-                        <Button asChild size="sm" className="ml-auto gap-1">
-                            <Link href="#">
-                                View All
-                                <ArrowUpRight className="h-4 w-4" />
-                            </Link>
+                        <Button onClick={navigateToOrders} size="sm" className="ml-auto gap-1">
+                            View All
+                            <ArrowUpRight className="h-4 w-4" />
                         </Button>
                     </CardHeader>
                     <CardContent>
