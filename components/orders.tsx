@@ -1,6 +1,5 @@
 "use client"
 
-import * as React from "react"
 import {
     CaretSortIcon,
     ChevronDownIcon,
@@ -18,6 +17,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table"
+import * as React from "react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -30,7 +30,13 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 import {
     Table,
     TableBody,
@@ -39,7 +45,6 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
-
 const data: Payment[] = [
     {
         id: "m5gr84i9",
@@ -212,14 +217,23 @@ export function Orders() {
     return (
         <div className="w-full">
             <div className="flex items-center py-4">
-                <Input
-                    placeholder="Filter emails..."
-                    value={(table.getColumn("email")?.getFilterValue() as string) ?? ""}
-                    onChange={(event) =>
-                        table.getColumn("email")?.setFilterValue(event.target.value)
+                <Select
+                    onValueChange={(value) =>
+                        table.getColumn("status")?.setFilterValue(value === " " ? undefined : value as string)
                     }
-                    className="max-w-sm"
-                />
+                >
+                    <SelectTrigger className="w-[180px] mr-4">
+                        <SelectValue placeholder="Filter status..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value=" ">All</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="success">Success</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                    </SelectContent>
+                </Select>
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
