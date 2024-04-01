@@ -21,6 +21,7 @@ import {
 import * as React from "react"
 
 import { Button } from "@/components/ui/button"
+import { CampaignStatusDialog } from "@/components/ui/campaign-status-dialog"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
     DropdownMenu,
@@ -31,6 +32,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { sendReminderCampaign } from "@/api/mailchimp"
 import {
     Select,
     SelectContent,
@@ -177,19 +179,6 @@ export const columns: ColumnDef<Order>[] = [
                         >
                             Copy Order ID
                         </DropdownMenuItem>
-                        {Order.status === 'pending' && (
-                            <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                    onClick={() => {
-                                        /* TODO: Handle properly */
-                                        console.log("Create campaign");
-                                    }}
-                                >
-                                    Create Campaign
-                                </DropdownMenuItem>
-                            </>
-                        )}
                     </DropdownMenuContent>
                 </DropdownMenu>
             )
@@ -227,12 +216,15 @@ export function Orders() {
 
     const selectedOrders = table.getFilteredSelectedRowModel().rows.map(row => row.original);
     const allSelectedOrdersArePending = selectedOrders.length > 0 && selectedOrders.every(order => order.status === 'pending');
+    const [showDialog, setShowDialog] = React.useState(false);
+    const [campaignStatus, setCampaignStatus] = React.useState(false);
 
-    const handleCreateCampaignClick = () => {
-        selectedOrders.forEach(order => {
-            /* TODO: Handle properly */
-            console.log(`Creating campaign for order ${order.id} from ${order.email}...`);
-        });
+    const handleCreateCampaignClick = async () => {
+        await Promise.all(selectedOrders.map(async (order) => {
+            let response = await sendReminderCampaign(order.email, order.id);
+            setCampaignStatus(response);
+            setShowDialog(true);
+        }));
     }
 
     return (
@@ -359,6 +351,7 @@ export function Orders() {
                     >
                         Next
                     </Button>
+                    <CampaignStatusDialog status={campaignStatus} showDialog={showDialog} setShowDialog={setShowDialog} />
                 </div>
             </div>
         </div>
